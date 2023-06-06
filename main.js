@@ -1,6 +1,4 @@
-const instancesList = [
-
-]
+const instancesList = []
 
 
 async function loadModel() {
@@ -19,18 +17,65 @@ async function loadModelMetaData() {
   }
 }
 
-async function main() {
+async function analyzeText(text) {
   let model = null
   let modelMetadata = null
   try {
     model = await loadModel()
     modelMetadata = await loadModelMetaData()
   } catch {
-    // TODO: Display an error message to the user
+    return 'unable to load model or/and its metadata'
+  }
+  
+  const OOV_INDEX = 2 // Index for words that are not in the vocabulary
+  const textNoPunctuation = text.trim().toLowerCase().replace(/(\.|\,|\!)/g, '').split(' ')
+  const sequence = []
+  for (const word of textNoPunctuation) {
+    const wordIndex = modelMetadata.wordIndex[word]
+    let finalWordIndex
+    if (!wordIndex) {
+      finalWordIndex = OOV_INDEX
+    } else {
+      // indexFrom insure that the wordIndex aligns with the pretrained model vocabulary
+      finalWordIndex = wordIndex + modelMetadata.indexFrom
+    }
+
+    if (finalWordIndex > modelMetadata.vocabularySize) {
+      finalWordIndex = OOV_INDEX
+    }
+
+    sequence.push(finalWordIndex)
   }
 
+  //pad sequence with 0s if not full.
+  if (sequence.length > modelMetadata.maxLen) {
+    sequence.splice(0, sequence.length - modelMetadata.maxLen)
+  }
+
+  if (sequence.length < modelMetadata.maxLen) {
+    const nbOfPaddingNeeded = modelMetadata.maxLen - sequence.length
+    for (let i = 0; i < nbOfPaddingNeeded; i++) {
+      sequence.unshift(0)
+    }
+  }
+
+  const input = tf.tensor2d(sequence, [1, modelMetadata.maxLen])
+  const predictOutput = model.predict(input)
+  const score = predictOutput.dataSync()[0]
+  
+  // freeing memory. Required when working with tensorflow.js
+  predictOutput.dispose()
+  input.dispose()
+
+  return score
+}
+
+async function main() {
+  
   const generateRatingBtn = document.getElementById('generateRatingBtn')
-  generateRatingBtn.addEventListener('click', () => {
+  generateRatingBtn.addEventListener('click', async () => {
+    console.log('test')
+
     const youtubeSrc = document.getElementById('youtube-src').value
 
     let videoId = ''
@@ -43,8 +88,9 @@ async function main() {
       videoId = youtubeSrc
     }
 
-
-
+    console.log(await analyzeText('This is bad!'))
   })
 
 }
+
+main()
