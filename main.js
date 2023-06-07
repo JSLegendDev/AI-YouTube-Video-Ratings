@@ -1,7 +1,7 @@
 async function loadModel() {
-    return await tf.loadLayersModel(
-     'https://storage.googleapis.com/tfjs-models/tfjs/sentiment_cnn_v1/model.json'
-    )
+  return await tf.loadLayersModel(
+    'https://storage.googleapis.com/tfjs-models/tfjs/sentiment_cnn_v1/model.json'
+  )
 }
 
 async function loadModelMetaData() {
