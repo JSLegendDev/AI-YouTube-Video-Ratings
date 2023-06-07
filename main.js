@@ -6,14 +6,47 @@ async function fetchYouTubeComments(videoId) {
     'https://vid.puffyan.us',
     'https://inv.riverside.rocks',
     'https://y.com.sb',
-    'https://invidious.tiekoetter.com'
+    'https://invidious.tiekoetter.com',
+    'https://inv.bp.projectsegfau.lt',
+    'https://invidious.flokinet.to',
+    'https://yt.artemislena.eu',
+    'https://iv.melmac.space',
+    'https://invidious.snopyta.org',
+    'https://iv.ggtyler.dev'
   ]
 
-  const response = await fetch(`${instancesList[Math.floor(Math.random() * instancesList.length)]}/api/v1/comments/${videoId}`)
-  const data = await response.json()
   const comments = []
-  for (const comment of data.comments) {
-    comments.push({content: comment.content, author: comment.author})
+  let firstFetch = true
+  let continuation = null
+  while (comments.length < 100) {
+    const selectedInstance = instancesList[Math.floor(Math.random() * instancesList.length)]
+
+    if (firstFetch) {
+      const response = await fetch(`${selectedInstance}/api/v1/comments/${videoId}`)
+      const data = await response.json()
+      for (const comment of data.comments) {
+        comments.push({content: comment.content, author: comment.author})
+      }
+
+      continuation = data.continuation
+      firstFetch = false
+      continue
+
+    } 
+
+    if (!continuation) {
+      break
+    }
+
+    const response = await fetch(`${selectedInstance}/api/v1/comments/${videoId}?continuation=${continuation}`)
+    const data = await response.json()
+    console.log(data)
+    for (const comment of data.comments) {
+      comments.push({content: comment.content, author: comment.author})
+    }
+
+    continuation = data.continuation
+
   }
 
   return comments
@@ -49,11 +82,16 @@ async function main() {
     }
 
     const comments = await fetchYouTubeComments(videoId)
+    let videoRating = 0
     for (const comment of comments) {
       comment.score = await analyzeText(model, modelMetadata, comment.content)
+      if (comment.score >= 0.5) {
+        videoRating += 1
+      }
     }
     
-    console.log(comments)
+    videoRating = videoRating / comments.length
+    console.log(videoRating)
   })
 
 }
