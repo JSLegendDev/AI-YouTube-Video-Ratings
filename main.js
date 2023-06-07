@@ -22,7 +22,7 @@ async function fetchYouTubeComments(videoId) {
     const selectedInstance = instancesList[Math.floor(Math.random() * instancesList.length)]
 
     if (firstFetch) {
-      const response = await fetch(`${selectedInstance}/api/v1/comments/${videoId}`)
+      const response = await fetch(`${selectedInstance}/api/v1/comments/${videoId}?sort_by=top`)
       const data = await response.json()
       for (const comment of data.comments) {
         comments.push({content: comment.content, author: comment.author})
@@ -38,7 +38,7 @@ async function fetchYouTubeComments(videoId) {
       break
     }
 
-    const response = await fetch(`${selectedInstance}/api/v1/comments/${videoId}?continuation=${continuation}`)
+    const response = await fetch(`${selectedInstance}/api/v1/comments/${videoId}?sort_by=top&continuation=${continuation}`)
     const data = await response.json()
     console.log(data)
     for (const comment of data.comments) {
@@ -92,6 +92,7 @@ async function main() {
     
     videoRating = videoRating / comments.length
     console.log(videoRating)
+    console.log(comments)
   })
 
 }
