@@ -1,6 +1,3 @@
-const instancesList = []
-
-
 async function loadModel() {
     return await tf.loadLayersModel(
      'https://storage.googleapis.com/tfjs-models/tfjs/sentiment_cnn_v1/model.json'
@@ -70,6 +67,19 @@ async function analyzeText(text) {
   return score
 }
 
+async function fetchYouTubeComments(videoId) {
+  const instancesList = [
+    'https://vid.puffyan.us',
+    'https://inv.riverside.rocks',
+    'https://y.com.sb',
+    'invidious.tiekoetter.com'
+  ]
+
+  const response = await fetch(`${instancesList[Math.floor(Math.random() * instancesList.length)]}/api/v1/comments/${videoId}`)
+  const data = await response.json()
+  console.log(data)
+}
+
 async function main() {
   
   const generateRatingBtn = document.getElementById('generateRatingBtn')
@@ -88,7 +98,7 @@ async function main() {
       videoId = youtubeSrc
     }
 
-    console.log(await analyzeText('This is bad!'))
+    fetchYouTubeComments(videoId)
   })
 
 }
