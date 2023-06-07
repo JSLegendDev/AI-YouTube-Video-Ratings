@@ -72,7 +72,7 @@ async function fetchYouTubeComments(videoId) {
     'https://vid.puffyan.us',
     'https://inv.riverside.rocks',
     'https://y.com.sb',
-    'invidious.tiekoetter.com'
+    'https://invidious.tiekoetter.com'
   ]
 
   const response = await fetch(`${instancesList[Math.floor(Math.random() * instancesList.length)]}/api/v1/comments/${videoId}`)
