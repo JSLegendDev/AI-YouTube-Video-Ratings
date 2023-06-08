@@ -90,7 +90,7 @@ async function main() {
       }
     }
     
-    videoRating = videoRating / comments.length
+    videoRating = ((videoRating / comments.length) + 0.10) * 100
     console.log(videoRating)
     console.log(comments)
   })
